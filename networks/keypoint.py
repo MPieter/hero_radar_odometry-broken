@@ -2,12 +2,14 @@ import torch
 import torch.nn.functional as F
 from utils.utils import normalize_coords
 
+
 class Keypoint(torch.nn.Module):
     """
         Given a dense map of detector scores and weight scores, this modules computes keypoint locations, and their
         associated scores and descriptors. A spatial softmax is used over a regular grid of "patches" to extract a
         single location, score, and descriptor per patch.
     """
+
     def __init__(self, config):
         super().__init__()
         self.patch_size = config['networks']['keypoint_block']['patch_size']

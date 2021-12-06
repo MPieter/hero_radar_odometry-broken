@@ -3,11 +3,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 from utils.utils import get_indices, normalize_coords
 
+
 class SoftmaxMatcher(nn.Module):
     """
         Performs soft matching between keypoint descriptors and a dense map of descriptors.
         A temperature-weighted softmax is used which can approximate argmax at low temperatures.
     """
+
     def __init__(self, config):
         super().__init__()
         self.softmax_temp = config['networks']['matcher_block']['softmax_temp']

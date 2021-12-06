@@ -12,11 +12,23 @@
 #
 ###############################################################################
 
-import numpy as np
 import cv2
+import numpy as np
+import os
 
 CTS350 = 0    # Oxford
 CIR204 = 1    # Boreas
+
+
+def load_neurodrone_azimuths():
+    azimuthBins = np.loadtxt("azimuthBins.txt")
+    tmp_azimuth_bins = azimuthBins + np.abs(azimuthBins[0])
+    default_azimuth_step = tmp_azimuth_bins[1] - tmp_azimuth_bins[0]
+    while tmp_azimuth_bins[-1] + default_azimuth_step < 2 * np.pi:
+        tmp_azimuth_bins = np.append(tmp_azimuth_bins, [tmp_azimuth_bins[-1] + default_azimuth_step])
+
+    return tmp_azimuth_bins
+
 
 def load_radar(example_path):
     """Decode a single Oxford Radar RobotCar Dataset radar example
@@ -32,14 +44,18 @@ def load_radar(example_path):
     # Hard coded configuration to simplify parsing code
     encoder_size = 5600
     raw_example_data = cv2.imread(example_path, cv2.IMREAD_GRAYSCALE)
-    timestamps = raw_example_data[:, :8].copy().view(np.int64)
-    azimuths = (raw_example_data[:, 8:10].copy().view(np.uint16) / float(encoder_size) * 2 * np.pi).astype(np.float32)
-    valid = raw_example_data[:, 10:11] == 255
-    fft_data = raw_example_data[:, 11:].astype(np.float32)[:, :, np.newaxis] / 255.
-    fft_data[:, :42] = 0
+
+    # TODO padd extra azimuths so that we fake a 360 degree field of view
+    filename = os.path.basename(example_path)
+    timestamps = [int(filename[:-4])]  # raw_example_data[:, :8].copy().view(np.int64)
+    azimuths = load_neurodrone_azimuths()  # (raw_example_data[:, 8:10].copy().view(np.uint16) / float(encoder_size) * 2 * np.pi).astype(np.float32)
+    valid = True  # raw_example_data[:, 10:11] == 255
+    fft_data = raw_example_data[:, :].astype(np.float32)[:, :, np.newaxis] / 255.
+    # fft_data[:, :42] = 0
     fft_data = np.squeeze(fft_data)
 
     return timestamps, azimuths, valid, fft_data
+
 
 def radar_polar_to_cartesian(azimuths, fft_data, radar_resolution, cart_resolution, cart_pixel_width,
                              interpolate_crossover=True, navtech_version=CTS350):
@@ -74,7 +90,7 @@ def radar_polar_to_cartesian(azimuths, fft_data, radar_resolution, cart_resoluti
     if navtech_version == CIR204:
         azimuths = azimuths.reshape((1, 1, 400))  # 1 x 1 x 400
         sample_angle = np.expand_dims(sample_angle, axis=-1)  # H x W x 1
-        diff =  np.abs(azimuths - sample_angle)
+        diff = np.abs(azimuths - sample_angle)
         c3 = np.argmin(diff, axis=2)
         azimuths = azimuths.squeeze()
         c3 = c3.reshape(cart_pixel_width, cart_pixel_width)  # azimuth indices (closest)

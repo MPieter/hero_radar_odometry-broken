@@ -17,12 +17,14 @@ torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.deterministic = True
 
+
 def get_folder_from_file_path(path):
     elems = path.split('/')
     newpath = ""
     for j in range(0, len(elems) - 1):
         newpath += elems[j] + "/"
     return newpath
+
 
 if __name__ == '__main__':
     torch.set_num_threads(8)

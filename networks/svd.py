@@ -2,12 +2,14 @@ import torch
 import torch.nn.functional as F
 from utils.utils import convert_to_radar_frame, get_indices
 
+
 class SVD(torch.nn.Module):
     """
         Computes a 3x3 rotation matrix SO(3) and a 3x1 translation vector from pairs of 3D point clouds aligned
         according to known correspondences. The forward() method uses singular value decomposition to do this.
         This implementation is differentiable and follows the derivation from State Estimation for Robotics (Barfoot).
     """
+
     def __init__(self, config):
         super().__init__()
         self.config = config

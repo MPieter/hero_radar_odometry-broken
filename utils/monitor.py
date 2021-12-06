@@ -24,7 +24,7 @@ class MonitorBase(object):
         self.current_time = 0
         self.vis_batches = self.get_vis_batches()
         if not os.path.exists(self.log_dir):
-            os.mkdir(self.log_dir)
+            os.makedirs(self.log_dir)
         self.writer = SummaryWriter(self.log_dir)
         print('monitor running and saving to {}'.format(self.log_dir))
 

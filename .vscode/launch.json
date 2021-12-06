@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Eval oxford under the radar",
+            "type": "python",
+            "request": "launch",
+            "program": "eval.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--pretrain",
+                "models/under_the_radar_res2592.pt",
+                "--config",
+                "models/under_the_radar_res2592.json"
+            ]
+        },
+        {
+            "name": "Train neurodrone under the radar",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--pretrain",
+                "models/under_the_radar_res2592.pt",
+                "--config",
+                "models/under_the_radar_neurodrone_res2592.json"
+            ]
+        }
+    ]
+}

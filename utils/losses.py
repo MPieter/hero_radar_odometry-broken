@@ -1,6 +1,7 @@
 import torch
 from utils.utils import get_indices, convert_to_weight_matrix
 
+
 def supervised_loss(R_tgt_src_pred, t_tgt_src_pred, batch, config, alpha=10.0):
     """This function computes the L1 loss between the predicted and groundtruth translation in addition to
         the rotation loss (R_pred.T * R) - I.
@@ -27,6 +28,7 @@ def supervised_loss(R_tgt_src_pred, t_tgt_src_pred, batch, config, alpha=10.0):
     svd_loss = t_loss + alpha * R_loss
     dict_loss = {'R_loss': R_loss, 't_loss': t_loss}
     return svd_loss, dict_loss
+
 
 def unsupervised_loss(out, batch, config, solver):
     """This function uses the reprojection between matched pairs of points as a training signal.

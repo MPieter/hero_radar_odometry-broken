@@ -11,6 +11,7 @@ from datasets.radar import load_radar, radar_polar_to_cartesian
 from datasets.interpolate_poses import interpolate_ins_poses
 from utils.utils import get_inverse_tf
 
+
 def get_transform_oxford(x, y, theta):
     """Returns a 4x4 homogeneous 3D transform for given 2D parameters (x, y, theta).
     Note: (x,y) are position of frame 2 wrt frame 1 as measured in frame 1.
@@ -27,7 +28,8 @@ def get_transform_oxford(x, y, theta):
     T[1, 3] = y
     return T
 
-def get_sequences(path, prefix='2019'):
+
+def get_sequences(path, prefix='2021'):
     """Retrieves a list of all the sequences in the dataset with the given prefix.
         Sequences are subfolders underneath 'path'
     Args:
@@ -40,6 +42,7 @@ def get_sequences(path, prefix='2019'):
     sequences.sort()
     return sequences
 
+
 def get_frames(path, extension='.png'):
     """Retrieves all the file names within a path that match the given extension.
     Args:
@@ -51,6 +54,7 @@ def get_frames(path, extension='.png'):
     frames = [f for f in os.listdir(path) if extension in f]
     frames.sort()
     return frames
+
 
 def mean_intensity_mask(polar_data, multiplier=3.0):
     """Thresholds on multiplier*np.mean(azimuth_data) to create a polar mask of likely target points.
@@ -67,14 +71,16 @@ def mean_intensity_mask(polar_data, multiplier=3.0):
         mask[i, :] = polar_data[i, :] > multiplier * m
     return mask
 
+
 class OxfordDataset(Dataset):
     """Oxford Radar Robotcar Dataset."""
+
     def __init__(self, config, split='train'):
         self.config = config
         self.data_dir = config['data_dir']
         dataset_prefix = ''
         if config['dataset'] == 'oxford':
-            dataset_prefix = '2019'
+            dataset_prefix = '2021'
         elif config['dataset'] == 'boreas':
             dataset_prefix = 'boreas'
         self.T_radar_imu = np.eye(4, dtype=np.float32)
@@ -151,7 +157,7 @@ class OxfordDataset(Dataset):
                 line = line.split(',')
                 if int(line[9]) == radar_time:
                     T = get_transform_oxford(float(line[2]), float(line[3]), float(line[7]))  # from next time to current
-                    return get_inverse_tf(T), int(line[1]), int(line[0]) # T_2_1 from current time step to the next
+                    return get_inverse_tf(T), int(line[1]), int(line[0])  # T_2_1 from current time step to the next
         assert(0), 'ground truth transform for {} not found in {}'.format(radar_time, gt_path)
 
     def get_groundruth_ins(self, time1, time2, gt_path):
@@ -189,6 +195,9 @@ class OxfordDataset(Dataset):
         timestamps, azimuths, _, polar = load_radar(frame)
         data = radar_polar_to_cartesian(azimuths, polar, self.config['radar_resolution'],
                                         self.config['cart_resolution'], self.config['cart_pixel_width'])  # 1 x H x W
+        # import cv2
+        # cv2.imshow('Test radar image', data)
+        # cv2.waitKey(1)
         polar_mask = mean_intensity_mask(polar)
         mask = radar_polar_to_cartesian(azimuths, polar_mask, self.config['radar_resolution'],
                                         self.config['cart_resolution'],
@@ -206,6 +215,7 @@ class OxfordDataset(Dataset):
         timestamps = np.expand_dims(timestamps, axis=0)
         return {'data': data, 'T_21': T_21, 't_ref': t_ref, 'mask': mask, 'polar': polar, 'azimuths': azimuths,
                 'timestamps': timestamps}
+
 
 def get_dataloaders(config):
     """Returns the dataloaders for training models in pytorch.

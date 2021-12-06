@@ -4,12 +4,14 @@ from networks.keypoint import Keypoint
 from networks.softmax_matcher import SoftmaxMatcher
 from networks.svd import SVD
 
+
 class UnderTheRadar(torch.nn.Module):
     """
         This model computes a 3x3 Rotation matrix and a 3x1 translation vector describing the transformation
         between two radar scans. This transformation can be used for odometry or metric localization.
         It is intended to be an implementation of Under the Radar (Barnes and Posner, 2020)
     """
+
     def __init__(self, config):
         super().__init__()
         self.config = config
