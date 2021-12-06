@@ -8,7 +8,7 @@ import torch
 from datasets.oxford import get_dataloaders
 from datasets.boreas import get_dataloaders_boreas
 from networks.under_the_radar import UnderTheRadar
-from networks.hero import HERO
+# from networks.hero import HERO
 from utils.utils import computeMedianError, computeKittiMetrics, save_in_yeti_format, get_T_ba, load_icra21_results
 from utils.utils import get_transform2
 from utils.vis import plot_sequences, draw_matches
@@ -37,10 +37,10 @@ if __name__ == '__main__':
     root = get_folder_from_file_path(args.pretrain)
     seq_nums = config['test_split']
     if config['model'] == 'UnderTheRadar':
-        model = UnderTheRadar(config).to(config['gpuid'])
-    elif config['model'] == 'HERO':
-        model = HERO(config).to(config['gpuid'])
-        model.solver.sliding_flag = True
+        model = UnderTheRadar(config)  # .to(config['gpuid'])
+    # elif config['model'] == 'HERO':
+    #     model = HERO(config).to(config['gpuid'])
+    #     model.solver.sliding_flag = True
     assert(args.pretrain is not None)
     checkpoint = torch.load(args.pretrain, map_location=torch.device(config['gpuid']))
     failed = False
@@ -88,17 +88,17 @@ if __name__ == '__main__':
                 R_pred_ = out['R'][0].detach().cpu().numpy().squeeze()
                 t_pred_ = out['t'][0].detach().cpu().numpy().squeeze()
                 T_pred.append(get_transform2(R_pred_, t_pred_))
-            elif config['model'] == 'HERO':
-                if batchi == len(test_loader) - 1:
-                    for w in range(batch['T_21'].size(0)-1):
-                        T_gt.append(batch['T_21'][w].numpy().squeeze())
-                        T_pred.append(get_T_ba(out, a=w, b=w+1))
-                        timestamps.append(batch['t_ref'][w].numpy().squeeze())
-                else:
-                    w = 0
-                    T_gt.append(batch['T_21'][w].numpy().squeeze())
-                    T_pred.append(get_T_ba(out, a=w, b=w+1))
-                    timestamps.append(batch['t_ref'][w].numpy().squeeze())
+            # elif config['model'] == 'HERO':
+            #     if batchi == len(test_loader) - 1:
+            #         for w in range(batch['T_21'].size(0)-1):
+            #             T_gt.append(batch['T_21'][w].numpy().squeeze())
+            #             T_pred.append(get_T_ba(out, a=w, b=w+1))
+            #             timestamps.append(batch['t_ref'][w].numpy().squeeze())
+            #     else:
+            #         w = 0
+            #         T_gt.append(batch['T_21'][w].numpy().squeeze())
+            #         T_pred.append(get_T_ba(out, a=w, b=w+1))
+            #         timestamps.append(batch['t_ref'][w].numpy().squeeze())
             # print('T_gt:\n{}'.format(T_gt[-1]))
             # print('T_pred:\n{}'.format(T_pred[-1]))
             time_used.append(time() - ts)

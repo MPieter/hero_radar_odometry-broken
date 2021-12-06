@@ -65,7 +65,7 @@ def unsupervised_loss(out, batch, config, solver):
     bcount = 0
     for b in range(batch_size):
         bcount += 1
-        i = b * (window_size-1)    # first index of window
+        i = b * (window_size - 1)    # first index of window
         # loop for each window frame
         for w in range(i, i + window_size - 1):
             # filter by zero intensity patches
