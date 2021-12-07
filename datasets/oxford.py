@@ -195,10 +195,7 @@ class OxfordDataset(Dataset):
         timestamps, azimuths, _, polar = load_radar(frame)
         data = radar_polar_to_cartesian(azimuths, polar, self.config['radar_resolution'],
                                         self.config['cart_resolution'], self.config['cart_pixel_width'])  # 1 x H x W
-        np.save("radar_test_file.npy", data)
-        # import cv2
-        # cv2.imshow('Test radar image', data)
-        # cv2.waitKey(1)
+        # np.save("radar_test_file.npy", data)
         polar_mask = mean_intensity_mask(polar)
         mask = radar_polar_to_cartesian(azimuths, polar_mask, self.config['radar_resolution'],
                                         self.config['cart_resolution'],
