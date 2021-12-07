@@ -229,5 +229,5 @@ def radar_polar_to_cartesian(azimuths: np.ndarray, fft_data: np.ndarray, radar_r
 
     polar_to_cart_warp = np.stack((sample_u, sample_v), -1).astype(np.float32)
     fft_data = np.reshape(fft_data.astype(np.float32), (fft_data.shape[0], fft_data.shape[1], 1))
-    cart_img = np.expand_dims(cv2.remap(fft_data, polar_to_cart_warp, None, cv2.INTER_LINEAR), -1)
+    cart_img = np.expand_dims(cv2.remap(fft_data, polar_to_cart_warp, None, cv2.INTER_LINEAR), axis=0)
     return cart_img
