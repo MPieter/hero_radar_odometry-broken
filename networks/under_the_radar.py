@@ -22,7 +22,7 @@ class UnderTheRadar(torch.nn.Module):
         self.svd = SVD(config)
 
     def forward(self, batch):
-        data = batch['data'].to(self.gpuid)
+        data = batch['data']  # .to(self.gpuid)
 
         detector_scores, weight_scores, desc = self.unet(data)
 

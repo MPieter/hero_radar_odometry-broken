@@ -414,8 +414,8 @@ def convert_to_radar_frame(pixel_coords, config):
     else:
         cart_min_range = cart_pixel_width // 2 * cart_resolution
     B, N, _ = pixel_coords.size()
-    R = torch.tensor([[0, -cart_resolution], [cart_resolution, 0]]).expand(B, 2, 2).to(gpuid)
-    t = torch.tensor([[cart_min_range], [-cart_min_range]]).expand(B, 2, N).to(gpuid)
+    R = torch.tensor([[0, -cart_resolution], [cart_resolution, 0]]).expand(B, 2, 2)#.to(gpuid)
+    t = torch.tensor([[cart_min_range], [-cart_min_range]]).expand(B, 2, N)#.to(gpuid)
     return (torch.bmm(R, pixel_coords.transpose(2, 1)) + t).transpose(2, 1)
 
 def get_indices(batch_size, window_size):

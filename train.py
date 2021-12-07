@@ -59,7 +59,7 @@ if __name__ == '__main__':
     if ckpt_path is not None:
         try:
             print('Loading from checkpoint: ' + ckpt_path)
-            checkpoint = torch.load(ckpt_path, map_location=torch.device(config['gpuid']))
+            checkpoint = torch.load(ckpt_path, map_location=torch.device('cpu'))
             model.load_state_dict(checkpoint['model_state_dict'], strict=False)
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             scheduler.load_state_dict(checkpoint['scheduler_state_dict'])

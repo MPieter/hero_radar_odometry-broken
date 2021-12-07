@@ -48,7 +48,7 @@ class SoftmaxMatcher(nn.Module):
         v_coord = v_coord.reshape(height * width).float()  # HW
         u_coord = u_coord.reshape(height * width).float()
         coords = torch.stack((u_coord, v_coord), dim=1)  # HW x 2
-        tgt_coords_dense = coords.unsqueeze(0).expand(B, height * width, 2).to(self.gpuid)  # B x HW x 2
+        tgt_coords_dense = coords.unsqueeze(0).expand(B, height * width, 2)  # .to(self.gpuid)  # B x HW x 2
 
         pseudo_coords = torch.matmul(tgt_coords_dense.transpose(2, 1),
                                      soft_match_vals.transpose(2, 1)).transpose(2, 1)  # BxNx2

@@ -34,9 +34,9 @@ class Keypoint(torch.nn.Module):
         """
         BW, encoder_dim, _, _ = descriptors.size()
         v_patches = F.unfold(self.v_coords.expand(BW, 1, self.width, self.width), kernel_size=self.patch_size,
-                             stride=self.patch_size).to(self.gpuid)  # (b*w,patch_elems,num_patches)
+                             stride=self.patch_size)  # .to(self.gpuid)  # (b*w,patch_elems,num_patches)
         u_patches = F.unfold(self.u_coords.expand(BW, 1, self.width, self.width), kernel_size=self.patch_size,
-                             stride=self.patch_size).to(self.gpuid)
+                             stride=self.patch_size)  # .to(self.gpuid)
         score_dim = weight_scores.size(1)
         detector_patches = F.unfold(detector_scores, kernel_size=self.patch_size, stride=self.patch_size)
         softmax_attention = F.softmax(detector_patches, dim=1)  # (b*w,patch_elems,num_patches)

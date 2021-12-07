@@ -62,7 +62,7 @@ class SVD(torch.nn.Module):
         except RuntimeError:     # torch.svd sometimes has convergence issues, this has yet to be patched.
             print(W)
             print('Adding turbulence to patch convergence issue')
-            U, _, V = torch.svd(W + 1e-4 * W.mean() * torch.rand(1, 3).to(self.gpuid))
+            U, _, V = torch.svd(W + 1e-4 * W.mean() * torch.rand(1, 3))  # .to(self.gpuid))
 
         det_UV = torch.det(U) * torch.det(V)
         ones = torch.ones(B, 2).type_as(V)

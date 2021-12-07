@@ -42,7 +42,7 @@ if __name__ == '__main__':
     #     model = HERO(config).to(config['gpuid'])
     #     model.solver.sliding_flag = True
     assert(args.pretrain is not None)
-    checkpoint = torch.load(args.pretrain, map_location=torch.device(config['gpuid']))
+    checkpoint = torch.load(args.pretrain, map_location=torch.device('cpu'))
     failed = False
     try:
         model.load_state_dict(checkpoint['model_state_dict'], strict=False)
