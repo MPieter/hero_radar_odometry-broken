@@ -37,7 +37,7 @@ if __name__ == '__main__':
         train_loader, valid_loader, _ = get_dataloaders_boreas(config)
 
     if config['model'] == 'UnderTheRadar':
-        model = UnderTheRadar(config)  # .to(config['gpuid'])
+        model = UnderTheRadar(config).to(config['gpuid'])
     # elif config['model'] == 'HERO':
     #     model = HERO(config).to(config['gpuid'])
 
