@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 import torch
 import torch.nn.functional as F
-
+import os
 
 def get_inverse_tf(T):
     """Returns the inverse of a given 4x4 homogeneous transform.
@@ -440,8 +440,10 @@ def convert_to_radar_frame(pixel_coords, config):
     return (torch.bmm(R, pixel_coords.transpose(2, 1)) + t).transpose(2, 1)
 
 
-rangeBins = np.loadtxt('../rangeBins.txt')
-azimuthBins = np.loadtxt('../azimuthBins.txt')
+rangeBinsPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'rangeBins.txt')
+rangeBins = np.loadtxt(rangeBinsPath)
+azimuthBinsPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'azimuthBins.txt')
+azimuthBins = np.loadtxt(azimuthBinsPath)
 
 
 def convert_pixel_polar_coords_to_radar_frame(polar_coords, config):
