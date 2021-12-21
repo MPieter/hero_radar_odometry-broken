@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+
 def get_inverse_tf(T):
     """Returns the inverse of a given 4x4 homogeneous transform.
     Args:
@@ -16,6 +17,7 @@ def get_inverse_tf(T):
     T2[0:3, 0:3] = R.transpose()
     T2[0:3, 3:] = np.matmul(-1 * R.transpose(), t)
     return T2
+
 
 def get_transform(x, y, theta):
     """Returns a 4x4 homogeneous 3D transform for a given 2D (x, y, theta).
@@ -32,6 +34,7 @@ def get_transform(x, y, theta):
     T[1, 3] = y
     return T
 
+
 def get_transform2(R, t):
     """Returns a 4x4 homogeneous 3D transform
     Args:
@@ -44,6 +47,7 @@ def get_transform2(R, t):
     T[0:3, 0:3] = R
     T[0:3, 3] = t.squeeze()
     return T
+
 
 def enforce_orthog(T, dim=3):
     """Enforces orthogonality of a 3x3 rotation matrix within a 4x4 homogeneous transformation matrix.
@@ -85,6 +89,7 @@ def enforce_orthog(T, dim=3):
         T[0:3, 2] = c2
     return T
 
+
 def carrot(xbar):
     """Overloaded operator. converts 3x1 vectors into a member of Lie Alebra so(3)
         Also, converts 6x1 vectors into a member of Lie Algebra se(3)
@@ -105,6 +110,7 @@ def carrot(xbar):
                          [0, 0, 0, 1]])
     print('WARNING: attempted carrot operator on invalid vector shape')
     return xbar
+
 
 def se3ToSE3(xi):
     """Converts 6x1 vectors representing the Lie Algebra, se(3) into a 4x4 homogeneous transform in SE(3)
@@ -129,6 +135,7 @@ def se3ToSE3(xi):
     T[0:3, 0:3] = R
     T[0:3, 3:] = rho
     return T
+
 
 def SE3tose3(T):
     """Converts 4x4 homogeneous transforms in SE(3) to 6x1 vectors representing the Lie Algebra, se(3)
@@ -159,6 +166,7 @@ def SE3tose3(T):
     xi[3:, 0:] = phi * abar
     return xi
 
+
 def rotationError(T):
     """Calculates a single rotation value corresponding to the upper-left 3x3 rotation matrix.
         Uses axis-angle representation to get a single number for rotation
@@ -169,6 +177,7 @@ def rotationError(T):
     """
     d = 0.5 * (np.trace(T[0:3, 0:3]) - 1)
     return np.arccos(max(min(d, 1.0), -1.0))
+
 
 def translationError(T, dim=2):
     """Calculates a euclidean distance corresponding to the translation vector within a 4x4 transform.
@@ -181,6 +190,7 @@ def translationError(T, dim=2):
     if dim == 2:
         return np.sqrt(T[0, 3]**2 + T[1, 3]**2)
     return np.sqrt(T[0, 3]**2 + T[1, 3]**2 + T[2, 3]**2)
+
 
 def computeMedianError(T_gt, T_pred):
     """Computes the median translation and rotation errors along with their standard deviations.
@@ -208,6 +218,7 @@ def computeMedianError(T_gt, T_pred):
     return [np.median(t_error), np.std(t_error), np.median(r_error), np.std(r_error), np.mean(t_error),
             np.mean(r_error), t_error, r_error]
 
+
 def trajectoryDistances(poses):
     """Calculates path length along the trajectory.
     Args:
@@ -221,8 +232,9 @@ def trajectoryDistances(poses):
         P2 = get_inverse_tf(poses[i])
         dx = P1[0, 3] - P2[0, 3]
         dy = P1[1, 3] - P2[1, 3]
-        dist.append(dist[i-1] + np.sqrt(dx**2 + dy**2))
+        dist.append(dist[i - 1] + np.sqrt(dx**2 + dy**2))
     return dist
+
 
 def lastFrameFromSegmentLength(dist, first_frame, length):
     """Retrieves the index of the last frame for our current analysis.
@@ -238,6 +250,7 @@ def lastFrameFromSegmentLength(dist, first_frame, length):
         if dist[i] > dist[first_frame] + length:
             return i
     return -1
+
 
 def calcSequenceErrors(poses_gt, poses_pred):
     """Calculate the translation and rotation error for each subsequence across several different lengths.
@@ -267,8 +280,9 @@ def calcSequenceErrors(poses_gt, poses_pred):
             # Approx speed
             num_frames = float(last_frame - first_frame + 1)
             speed = float(length) / (0.25 * num_frames)
-            err.append([first_frame, r_err/float(length), t_err/float(length), length, speed])
+            err.append([first_frame, r_err / float(length), t_err / float(length), length, speed])
     return err
+
 
 def getStats(err):
     """Computes the average translation and rotation within a sequence (across subsequences of diff lengths)."""
@@ -280,6 +294,7 @@ def getStats(err):
     t_err /= float(len(err))
     r_err /= float(len(err))
     return t_err, r_err
+
 
 def computeKittiMetrics(T_gt, T_pred, seq_lens):
     """Computes the translational (%) and rotational drift (deg/m) in the KITTI style.
@@ -320,11 +335,14 @@ def computeKittiMetrics(T_gt, T_pred, seq_lens):
     r_err = avg[1]
     return t_err * 100, r_err * 180 / np.pi
 
+
 def saveKittiErrors(err, fname):
     pickle.dump(err, open(fname, 'wb'))
 
+
 def loadKittiErrors(fname):
     return pickle.load(open(fname, 'rb'))
+
 
 def save_in_yeti_format(T_gt, T_pred, timestamps, seq_lens, seq_names, root='./'):
     """This function converts outputs to a file format that is backwards compatible with the yeti repository.
@@ -355,6 +373,7 @@ def save_in_yeti_format(T_gt, T_pred, timestamps, seq_lens, seq_names, root='./'
                 f.write('{},{},{},{},{},{},{},{}\n'.format(t[0, 0], t[1, 0], yaw, T[0, 3], T[1, 3], gtyaw,
                                                            timestamps[i][0], timestamps[i][1]))
 
+
 def load_icra21_results(results_loc, seq_names, seq_lens):
     """Loads ICRA 2021 results for MC-RANSAC (Burnett et al.) on the Oxford Radar Dataset.
     Args:
@@ -384,6 +403,7 @@ def load_icra21_results(results_loc, seq_names, seq_lens):
                 count += 1
     return T_icra
 
+
 def normalize_coords(coords_2D, width, height):
     """Normalizes coords_2D (BW x N x 2) in pixel coordinates to be within [-1, 1]
     Args:
@@ -397,6 +417,7 @@ def normalize_coords(coords_2D, width, height):
     u_norm = (2 * coords_2D[:, :, 0].reshape(batch_size, -1) / (width - 1)) - 1
     v_norm = (2 * coords_2D[:, :, 1].reshape(batch_size, -1) / (height - 1)) - 1
     return torch.stack([u_norm, v_norm], dim=2)  # BW x num_patches x 2
+
 
 def convert_to_radar_frame(pixel_coords, config):
     """Converts pixel_coords (B x N x 2) from pixel coordinates to metric coordinates in the radar frame.
@@ -418,6 +439,47 @@ def convert_to_radar_frame(pixel_coords, config):
     t = torch.tensor([[cart_min_range], [-cart_min_range]]).expand(B, 2, N).to(gpuid)
     return (torch.bmm(R, pixel_coords.transpose(2, 1)) + t).transpose(2, 1)
 
+
+rangeBins = np.loadtxt('../rangeBins.txt')
+azimuthBins = np.loadtxt('../azimuthBins.txt')
+
+
+def convert_pixel_polar_coords_to_radar_frame(polar_coords, config):
+    """Converts polar_coords (B x N x 2) from pixel polar coordinates to metric coordinates in the radar frame.
+    Args:
+        polar_coords (torch.tensor): (B,N,2) pixel polar coordinates
+        config (json): parse configuration file
+    Returns:
+        torch.tensor: (B,N,2) metric coordinates
+    """
+    cart_pixel_width = config['cart_pixel_width']
+    cart_resolution = config['cart_resolution']
+    gpuid = config['gpuid']
+    if (cart_pixel_width % 2) == 0:
+        cart_min_range = (cart_pixel_width / 2 - 0.5) * cart_resolution
+    else:
+        cart_min_range = cart_pixel_width // 2 * cart_resolution
+    B, N, _ = polar_coords.size()
+
+    rangeBinsTensor = torch.from_numpy(rangeBins).to(gpuid)
+    azimuthBinsTensor = torch.from_numpy(azimuthBins).to(gpuid)
+    _azimuthBinsTensor = torch.reshape(azimuthBinsTensor, (1, 1, azimuthBinsTensor.shape[0]))
+    _rangeBinsTensor = torch.reshape(rangeBinsTensor, (1, 1, rangeBinsTensor.shape[0]))
+    _azimuthBinsTensor = _azimuthBinsTensor.expand(B, N, -1).to(gpuid)
+    _rangeBinsTensor = _rangeBinsTensor.expand(B, N, -1).to(gpuid)
+
+    azimuth_idxs = torch.index_select(polar_coords, 2, torch.tensor([0]))  # B x N x 1
+    range_idxs = torch.index_select(polar_coords, 2, torch.tensor([1]))  # B x N x 1
+
+    azimuths = torch.gather(_azimuthBinsTensor, 2, azimuth_idxs)  # B x N x 1
+    ranges = torch.gather(_rangeBinsTensor, 2, range_idxs)  # B x N x 1
+
+    x = torch.mul(ranges, torch.sin(azimuths))
+    y = torch.mul(ranges, torch.cos(azimuths))
+
+    return torch.cat((x, y), 2)
+
+
 def get_indices(batch_size, window_size):
     """Retrieves batch indices for for source and target frames.
        This is intended to be used with the UnderTheRadar model.
@@ -430,6 +492,7 @@ def get_indices(batch_size, window_size):
             src_ids.append(idx)
             tgt_ids.append(idx + 1)
     return src_ids, tgt_ids
+
 
 def get_indices2(batch_size, window_size, asTensor=False):
     """Retrieves batch indices for for source and target frames.
@@ -448,9 +511,11 @@ def get_indices2(batch_size, window_size, asTensor=False):
         return torch.from_numpy(src_ids), torch.from_numpy(tgt_ids)
     return src_ids, tgt_ids
 
+
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:
         return param_group['lr']
+
 
 def get_T_ba(out, a, b):
     """Retrieves the transformation matrix from a to b given the output of the DNN.
@@ -468,6 +533,7 @@ def get_T_ba(out, a, b):
     T_a0[:3, :3] = out['R'][0, a].detach().cpu().numpy()
     T_a0[:3, 3:4] = out['t'][0, a].detach().cpu().numpy()
     return np.matmul(T_b0, get_inverse_tf(T_a0))
+
 
 def convert_to_weight_matrix(w, window_id, T_aug=[]):
     """This function converts the S-dimensional weights estimated for each keypoint into
@@ -510,12 +576,13 @@ def convert_to_weight_matrix(w, window_id, T_aug=[]):
         A = torch.zeros(w.size(0), 3, 3, device=w.device)
         A[:, 0:2, 0:2] = A2x2
         A[:, 2, 2] = torch.exp(torch.tensor(z_weight))
-        d = torch.ones(w.size(0), 3, device=w.device)*z_weight
+        d = torch.ones(w.size(0), 3, device=w.device) * z_weight
         d[:, 0:2] = w[:, 1:]
     else:
         assert False, "Weight scores should be dim 1 or 3"
 
     return A, d
+
 
 def mask_intensity_filter(data, patch_size, patch_mean_thres=0.05):
     """Given a cartesian mask of likely target pixels (data), this function computes the percentage of
@@ -532,6 +599,7 @@ def mask_intensity_filter(data, patch_size, patch_mean_thres=0.05):
     keypoint_int = torch.mean(int_patches, dim=1, keepdim=True)  # BW x 1 x num_patches
     return keypoint_int >= patch_mean_thres
 
+
 def wrapto2pi(phi):
     """Ensures that the output angle phi is within the interval [0, 2*pi)"""
     if phi < 0:
@@ -539,6 +607,7 @@ def wrapto2pi(phi):
     elif phi >= 2 * np.pi:
         return (phi / (2 * np.pi) % 1) * 2 * np.pi
     return phi
+
 
 def getApproxTimeStamps(points, times, flip_y=False):
     """Retrieves the approximate timestamp of each target point.
@@ -572,6 +641,7 @@ def getApproxTimeStamps(points, times, flip_y=False):
             point_times.append(t)
         timestamps.append(np.array(point_times))
     return timestamps
+
 
 def undistort_pointcloud(points, point_times, t_refs, solver):
     """Removes motion distortion from pointclouds.

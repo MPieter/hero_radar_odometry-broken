@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from utils.utils import convert_to_radar_frame, get_indices
+from utils.utils import convert_pixel_polar_coords_to_radar_frame, get_indices
 
 
 class SVD(torch.nn.Module):
@@ -36,8 +36,8 @@ class SVD(torch.nn.Module):
         assert(src_coords.size() == tgt_coords.size())
         B = src_coords.size(0)  # B x N x 2
         if convert_from_pixels:
-            src_coords = convert_to_radar_frame(src_coords, self.config)
-            tgt_coords = convert_to_radar_frame(tgt_coords, self.config)
+            src_coords = convert_pixel_polar_coords_to_radar_frame(src_coords, self.config)
+            tgt_coords = convert_pixel_polar_coords_to_radar_frame(tgt_coords, self.config)
         if src_coords.size(2) < 3:
             pad = 3 - src_coords.size(2)
             src_coords = F.pad(src_coords, [0, pad, 0, 0])

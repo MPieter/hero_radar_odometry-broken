@@ -193,16 +193,7 @@ class OxfordDataset(Dataset):
         seq = self.get_seq_from_idx(idx)
         frame = self.data_dir + seq + '/radar/' + self.frames[idx]
         timestamps, azimuths, _, polar = load_radar(frame)
-        data = radar_polar_to_cartesian(azimuths, polar, self.config['radar_resolution'],
-                                        self.config['cart_resolution'], self.config['cart_pixel_width'])  # 1 x H x W
-        np.save("radar_test_file.npy", data)
-        # import cv2
-        # cv2.imshow('Test radar image', data)
-        # cv2.waitKey(1)
         polar_mask = mean_intensity_mask(polar)
-        mask = radar_polar_to_cartesian(azimuths, polar_mask, self.config['radar_resolution'],
-                                        self.config['cart_resolution'],
-                                        self.config['cart_pixel_width']).astype(np.float32)
         # Get ground truth transform between this frame and the next
         radar_time = int(self.frames[idx].split('.')[0])
 
@@ -214,7 +205,7 @@ class OxfordDataset(Dataset):
         polar = np.expand_dims(polar, axis=0)
         azimuths = np.expand_dims(azimuths, axis=0)
         timestamps = np.expand_dims(timestamps, axis=0)
-        return {'data': data, 'T_21': T_21, 't_ref': t_ref, 'mask': mask, 'polar': polar, 'azimuths': azimuths,
+        return {'data': polar, 'T_21': T_21, 't_ref': t_ref, 'mask': polar_mask, 'polar': polar, 'azimuths': azimuths,
                 'timestamps': timestamps}
 
 
