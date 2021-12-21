@@ -9,8 +9,10 @@ from utils.losses import supervised_loss, unsupervised_loss
 from utils.utils import get_T_ba
 from utils.vis import draw_batch, plot_sequences, draw_batch_steam
 
+
 class MonitorBase(object):
     """This base class is used for monitoring the training process and executing validation / visualization."""
+
     def __init__(self, model, valid_loader, config):
         self.model = model
         self.log_dir = config['log_dir']
@@ -64,6 +66,7 @@ class MonitorBase(object):
         """This function will compute loss, median errors, KITTI metrics, and draw visualizations."""
         raise NotImplementedError('Subclasses must override validation()!')
 
+
 class SVDMonitor(MonitorBase):
 
     def vis(self, batchi, batch, out):
@@ -103,23 +106,24 @@ class SVDMonitor(MonitorBase):
             T_pred.append(get_transform2(R_pred_, t_pred_))
 
         results = computeMedianError(T_gt, T_pred)
-        t_err, r_err = computeKittiMetrics(T_gt, T_pred, self.seq_lens)
+        # t_err, r_err = computeKittiMetrics(T_gt, T_pred, self.seq_lens)
 
         self.writer.add_scalar('val/loss', valid_loss, self.counter)
         for loss_name in aux_losses:
             self.writer.add_scalar('val/' + loss_name, aux_losses[loss_name], self.counter)
-        self.writer.add_scalar('val/avg_time_per_batch', sum(time_used)/len(time_used), self.counter)
+        self.writer.add_scalar('val/avg_time_per_batch', sum(time_used) / len(time_used), self.counter)
         self.writer.add_scalar('val/t_err_med', results[0], self.counter)
         self.writer.add_scalar('val/t_err_std', results[1], self.counter)
         self.writer.add_scalar('val/R_err_med', results[2], self.counter)
         self.writer.add_scalar('val/R_err_std', results[3], self.counter)
-        self.writer.add_scalar('val/KITTI/t_err', t_err, self.counter)
-        self.writer.add_scalar('val/KITTI/r_err', r_err, self.counter)
+        # self.writer.add_scalar('val/KITTI/t_err', t_err, self.counter)
+        # self.writer.add_scalar('val/KITTI/r_err', r_err, self.counter)
 
         imgs = plot_sequences(T_gt, T_pred, self.seq_lens)
         for i, img in enumerate(imgs):
             self.writer.add_image('val/' + self.sequences[i], img, self.counter)
-        return t_err
+        return 0  # t_err
+
 
 class SteamMonitor(MonitorBase):
 
@@ -191,9 +195,9 @@ class SteamMonitor(MonitorBase):
             time_used.append(time() - ts)
             if batchi == len(self.valid_loader) - 1:
                 # append entire window
-                for w in range(batch['T_21'].size(0)-1):
+                for w in range(batch['T_21'].size(0) - 1):
                     T_gt.append(batch['T_21'][w].numpy().squeeze())
-                    T_pred.append(get_T_ba(out, a=w, b=w+1))
+                    T_pred.append(get_T_ba(out, a=w, b=w + 1))
             else:
                 # append only the front of window
                 T_gt.append(batch['T_21'][0].numpy().squeeze())
@@ -205,7 +209,7 @@ class SteamMonitor(MonitorBase):
         self.writer.add_scalar('val/loss', valid_loss, self.counter)
         for loss_name in aux_losses:
             self.writer.add_scalar('val/' + loss_name, aux_losses[loss_name], self.counter)
-        self.writer.add_scalar('val/avg_time_per_batch', sum(time_used)/len(time_used), self.counter)
+        self.writer.add_scalar('val/avg_time_per_batch', sum(time_used) / len(time_used), self.counter)
         self.writer.add_scalar('val/t_err_med', results[0], self.counter)
         self.writer.add_scalar('val/t_err_std', results[1], self.counter)
         self.writer.add_scalar('val/R_err_med', results[2], self.counter)
