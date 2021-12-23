@@ -454,13 +454,7 @@ def convert_pixel_polar_coords_to_radar_frame(polar_coords, config):
     Returns:
         torch.tensor: (B,N,2) metric coordinates
     """
-    cart_pixel_width = config['cart_pixel_width']
-    cart_resolution = config['cart_resolution']
     gpuid = config['gpuid']
-    if (cart_pixel_width % 2) == 0:
-        cart_min_range = (cart_pixel_width / 2 - 0.5) * cart_resolution
-    else:
-        cart_min_range = cart_pixel_width // 2 * cart_resolution
     B, N, _ = polar_coords.size()
 
     rangeBinsTensor = torch.from_numpy(rangeBins).to(gpuid)
@@ -470,11 +464,12 @@ def convert_pixel_polar_coords_to_radar_frame(polar_coords, config):
     _azimuthBinsTensor = _azimuthBinsTensor.expand(B, N, -1).to(gpuid)
     _rangeBinsTensor = _rangeBinsTensor.expand(B, N, -1).to(gpuid)
 
-    azimuth_idxs = torch.index_select(polar_coords, 2, torch.tensor([0]))  # B x N x 1
-    range_idxs = torch.index_select(polar_coords, 2, torch.tensor([1]))  # B x N x 1
+    azimuth_idxs = torch.index_select(polar_coords, 2, torch.tensor([0]).to(gpuid))  # B x N x 1
+    range_idxs = torch.index_select(polar_coords, 2, torch.tensor([1]).to(gpuid))  # B x N x 1
 
-    azimuths = torch.gather(_azimuthBinsTensor, 2, azimuth_idxs)  # B x N x 1
-    ranges = torch.gather(_rangeBinsTensor, 2, range_idxs)  # B x N x 1
+    # TODO we lose some accuracy here because you could interpolate the azimuth and range values
+    azimuths = torch.gather(_azimuthBinsTensor, 2, azimuth_idxs.to(torch.long))  # B x N x 1
+    ranges = torch.gather(_rangeBinsTensor, 2, range_idxs.long())  # B x N x 1
 
     x = torch.mul(ranges, torch.sin(azimuths))
     y = torch.mul(ranges, torch.cos(azimuths))

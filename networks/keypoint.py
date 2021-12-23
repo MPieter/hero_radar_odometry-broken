@@ -14,8 +14,9 @@ class Keypoint(torch.nn.Module):
         super().__init__()
         self.patch_size = config['networks']['keypoint_block']['patch_size']
         self.gpuid = config['gpuid']
-        self.width = config['cart_pixel_width']
-        v_coords, u_coords = torch.meshgrid([torch.arange(0, self.width), torch.arange(0, self.width)])
+        self.width = config['polar_azimuth_width']
+        self.height = config['polar_range_width']
+        v_coords, u_coords = torch.meshgrid([torch.arange(0, self.height), torch.arange(0, self.width)])
         self.v_coords = v_coords.unsqueeze(0).float()  # (1,H,W)
         self.u_coords = u_coords.unsqueeze(0).float()
 
@@ -33,9 +34,9 @@ class Keypoint(torch.nn.Module):
             keypoint_desc (torch.tensor): (b*w,C,num_patches)
         """
         BW, encoder_dim, _, _ = descriptors.size()
-        v_patches = F.unfold(self.v_coords.expand(BW, 1, self.width, self.width), kernel_size=self.patch_size,
+        v_patches = F.unfold(self.v_coords.expand(BW, 1, self.height, self.width), kernel_size=self.patch_size,
                              stride=self.patch_size).to(self.gpuid)  # (b*w,patch_elems,num_patches)
-        u_patches = F.unfold(self.u_coords.expand(BW, 1, self.width, self.width), kernel_size=self.patch_size,
+        u_patches = F.unfold(self.u_coords.expand(BW, 1, self.height, self.width), kernel_size=self.patch_size,
                              stride=self.patch_size).to(self.gpuid)
         score_dim = weight_scores.size(1)
         detector_patches = F.unfold(detector_scores, kernel_size=self.patch_size, stride=self.patch_size)
