@@ -467,9 +467,18 @@ def convert_pixel_polar_coords_to_radar_frame(polar_coords, config):
     azimuth_idxs = torch.index_select(polar_coords, 2, torch.tensor([0]).to(gpuid))  # B x N x 1
     range_idxs = torch.index_select(polar_coords, 2, torch.tensor([1]).to(gpuid))  # B x N x 1
 
+    azimuth_idxs = azimuth_idxs.to(torch.long)
+    range_idxs = range_idxs.to(torch.long)
+
+    azimuth_idxs[azimuth_idxs < 0] = 0
+    range_idxs[range_idxs < 0] = 0
+
+    azimuth_idxs[azimuth_idxs > azimuth_idxs.shape[2]] = azimuth_idxs.shape[2]
+    range_idxs[range_idxs > range_idxs.shape[2]] = range_idxs.shape[2]
+
     # TODO we lose some accuracy here because you could interpolate the azimuth and range values
-    azimuths = torch.gather(_azimuthBinsTensor, 2, azimuth_idxs.to(torch.long))  # B x N x 1
-    ranges = torch.gather(_rangeBinsTensor, 2, range_idxs.long())  # B x N x 1
+    azimuths = torch.gather(_azimuthBinsTensor, 2, azimuth_idxs)  # B x N x 1
+    ranges = torch.gather(_rangeBinsTensor, 2, range_idxs)  # B x N x 1
 
     x = torch.mul(ranges, torch.sin(azimuths))
     y = torch.mul(ranges, torch.cos(azimuths))
