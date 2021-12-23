@@ -34,7 +34,7 @@
                 "--pretrain",
                 "models/under_the_radar_res2592.pt",
                 "--config",
-                "models/under_the_radar_neurodrone_res2592.json"
+                "models/under_the_radar_neurodrone_res2592_nvidia.json"
             ]
         }
     ]
